@@ -872,11 +872,11 @@ func (s *session) handlePacket(p *receivedPacket) {
 }
 
 func (s *session) handleConnectionCloseFrame(frame *wire.ConnectionCloseFrame) {
-	var e error
+	var e qerr.QuicError
 	if frame.IsApplicationError {
-		e = qerr.ApplicationError(frame.ErrorCode, frame.ReasonPhrase)
+		e = *qerr.ApplicationError(frame.ErrorCode, frame.ReasonPhrase)
 	} else {
-		e = qerr.Error(frame.ErrorCode, frame.ReasonPhrase)
+		e = *qerr.Error(frame.ErrorCode, frame.ReasonPhrase)
 	}
 	s.closeRemote(e)
 }
@@ -1021,10 +1021,14 @@ func (s *session) closeForRecreating() protocol.PacketNumber {
 	return nextPN
 }
 
-func (s *session) closeRemote(e error) {
+func (s *session) closeRemote(e qerr.QuicError) {
 	s.closeOnce.Do(func() {
-		s.logger.Errorf("Peer closed session with error: %s", e)
-		s.closeChan <- closeError{err: e, immediate: true, remote: true}
+		if e.ErrorCode != qerr.NoError {
+			s.logger.Errorf("Peer closed session with error: %s", e)
+		} else {
+			s.logger.Debugf("Peer closed session without error: %s", e)
+		}
+		s.closeChan <- closeError{err: errors.New(e.Error()), immediate: true, remote: true}
 	})
 }
 

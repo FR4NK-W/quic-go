@@ -52,7 +52,7 @@ type quicSession interface {
 	run() error
 	destroy(error)
 	closeForRecreating() protocol.PacketNumber
-	closeRemote(error)
+	closeRemote(qerr.QuicError)
 }
 
 // A Listener of QUIC
