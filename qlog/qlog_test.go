@@ -3,6 +3,7 @@ package qlog
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"time"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
@@ -11,6 +12,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+type nopWriteCloserImpl struct{ io.Writer }
+
+func (nopWriteCloserImpl) Close() error { return nil }
+
+func nopWriteCloser(w io.Writer) io.WriteCloser {
+	return &nopWriteCloserImpl{Writer: w}
+}
 
 var _ = Describe("Tracer", func() {
 	var tracer Tracer
@@ -21,7 +30,7 @@ var _ = Describe("Tracer", func() {
 
 	It("exports a trace that has the right metadata", func() {
 		buf := &bytes.Buffer{}
-		Expect(tracer.Export(buf)).To(Succeed())
+		Expect(tracer.Export(nopWriteCloser(buf))).To(Succeed())
 
 		m := make(map[string]interface{})
 		Expect(json.Unmarshal(buf.Bytes(), &m)).To(Succeed())
@@ -47,7 +56,7 @@ var _ = Describe("Tracer", func() {
 	Context("Events", func() {
 		exportAndParse := func() (time.Time, string /* category */, string /* event */, map[string]interface{}) {
 			buf := &bytes.Buffer{}
-			Expect(tracer.Export(buf)).To(Succeed())
+			Expect(tracer.Export(nopWriteCloser(buf))).To(Succeed())
 
 			m := make(map[string]interface{})
 			Expect(json.Unmarshal(buf.Bytes(), &m)).To(Succeed())

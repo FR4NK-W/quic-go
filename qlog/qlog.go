@@ -11,7 +11,7 @@ import (
 
 // A Tracer records events to be exported to a qlog.
 type Tracer interface {
-	Export(io.Writer) error
+	Export(io.WriteCloser) error
 	SentPacket(time.Time, *wire.ExtendedHeader, []wire.Frame)
 	ReceivedPacket(time.Time, *wire.ExtendedHeader, []wire.Frame)
 }
@@ -34,7 +34,7 @@ func NewTracer(p protocol.Perspective, odcid protocol.ConnectionID) Tracer {
 }
 
 // Export writes a qlog.
-func (t *tracer) Export(w io.Writer) error {
+func (t *tracer) Export(w io.WriteCloser) error {
 	enc := gojay.NewEncoder(w)
 	enc.Encode(&topLevel{
 		traces: traces{
@@ -45,7 +45,7 @@ func (t *tracer) Export(w io.Writer) error {
 				Events:       t.events,
 			},
 		}})
-	return nil
+	return w.Close()
 }
 
 func (t *tracer) SentPacket(time time.Time, hdr *wire.ExtendedHeader, frames []wire.Frame) {
