@@ -1026,7 +1026,7 @@ func (s *session) closeRemote(e qerr.QuicError) {
 		if e.ErrorCode != qerr.NoError {
 			s.logger.Errorf("Peer closed session with error: %s", e)
 		} else {
-			s.logger.Debugf("Peer closed session without error: %s", e)
+			s.logger.Infof("Peer closed session without error: %s", e)
 		}
 		s.closeChan <- closeError{err: errors.New(e.Error()), immediate: true, remote: true}
 	})
