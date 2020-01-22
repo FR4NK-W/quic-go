@@ -30,7 +30,7 @@ func (e ErrorCode) isCryptoError() bool {
 
 func (e ErrorCode) Error() string {
 	if e.isCryptoError() {
-		return fmt.Sprintf("%s: %s", e.String(), e.Message())
+		return fmt.Sprintf("/CryptoError/%s: %s", e.String(), e.Message())
 	}
 	return e.String()
 }
