@@ -65,7 +65,7 @@ func ApplicationError(errorCode ErrorCode, errorMessage string) *QuicError {
 func (e *QuicError) Error() string {
 	if e.isApplicationError {
 		if len(e.ErrorMessage) == 0 {
-			return fmt.Sprintf("Application error %#x", uint64(e.ErrorCode))
+			return fmt.Sprintf("Application error [%#x]", uint64(e.ErrorCode))
 		}
 		return fmt.Sprintf("Application error %#x: %s", uint64(e.ErrorCode), e.ErrorMessage)
 	}
@@ -112,5 +112,5 @@ func ToQuicError(err error) *QuicError {
 	case ErrorCode:
 		return Error(e, "")
 	}
-	return Error(InternalError, err.Error())
+	return Error(InternalError, err.Error() + "ToQuicError fallthrough")
 }
