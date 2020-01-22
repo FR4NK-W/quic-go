@@ -112,5 +112,5 @@ func ToQuicError(err error) *QuicError {
 	case ErrorCode:
 		return Error(e, "")
 	}
-	return Error(InternalError, err.Error() + "ToQuicError fallthrough")
+	return Error(InternalError, err.Error() + " ToQuicError fallthrough")
 }

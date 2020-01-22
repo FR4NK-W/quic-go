@@ -1048,14 +1048,15 @@ func (s *session) CloseWithError(code protocol.ApplicationErrorCode, desc string
 
 func (s *session) handleCloseError(closeErr closeError) {
 	if closeErr.err == nil {
-		closeErr.err = qerr.ApplicationError(0, "closeError")
+		closeErr.err = qerr.ApplicationError(0, "XXXXXXXcloseErrorXXXXXXXXX")
 	}
 
-	var quicErr *qerr.QuicError
+	/*var quicErr *qerr.QuicError
 	var ok bool
 	if quicErr, ok = closeErr.err.(*qerr.QuicError); !ok {
 		quicErr = qerr.ToQuicError(closeErr.err)
-	}
+	}*/
+	quicErr := qerr.ToQuicError(closeErr.err)
 
 	s.streamsMap.CloseWithError(quicErr)
 	s.connIDManager.Close()
