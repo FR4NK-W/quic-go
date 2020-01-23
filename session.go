@@ -1023,8 +1023,9 @@ func (s *session) closeForRecreating() protocol.PacketNumber {
 
 func (s *session) closeRemote(e error) {
 	s.closeOnce.Do(func() {
+		// Don't log 'normal' reasons
 		if quicErr, ok := e.(*qerr.QuicError); ok && quicErr.ErrorCode == qerr.NoError {
-			s.logger.Infof("Peer closed session without error: %s", e)
+			s.logger.Infof("Closing connection %s.", s.logID)
 		} else {
 			s.logger.Errorf("Peer closed session with error: %s", e)
 		}
@@ -1048,15 +1049,14 @@ func (s *session) CloseWithError(code protocol.ApplicationErrorCode, desc string
 
 func (s *session) handleCloseError(closeErr closeError) {
 	if closeErr.err == nil {
-		closeErr.err = qerr.ApplicationError(0, "XXXXXXXcloseErrorXXXXXXXXX")
+		closeErr.err = qerr.ApplicationError(qerr.NoError, "NoError")
 	}
 
-	/*var quicErr *qerr.QuicError
+	var quicErr *qerr.QuicError
 	var ok bool
 	if quicErr, ok = closeErr.err.(*qerr.QuicError); !ok {
 		quicErr = qerr.ToQuicError(closeErr.err)
-	}*/
-	quicErr := qerr.ToQuicError(closeErr.err)
+	}
 
 	s.streamsMap.CloseWithError(quicErr)
 	s.connIDManager.Close()
